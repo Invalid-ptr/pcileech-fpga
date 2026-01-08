@@ -17,7 +17,6 @@ module pcileech_pcie_cfgspace_shadow(
     input                   clk,
     IfShadow2Fifo.src       dshadow2fifo,
     IfShadow2Tlp.shadow     dshadow2tlp,
-    // INTERNAL - MSI-X Controller Interface
     input                   int_rden,
     input                   int_wren,
     input  [9:0]            int_wr_addr,
@@ -26,11 +25,6 @@ module pcileech_pcie_cfgspace_shadow(
     output [31:0]           int_rd_data
     );
     
-    // ----------------------------------------------------------------------------
-    // WRITE multiplexor: simple naive multiplexor which will prioritize in order:
-    // (1) PCIe (if enabled), (2) USB, (3) INTERNAL.
-    // Collisions will be discarded (it's assumed that they'll be very rare)
-    // ----------------------------------------------------------------------------
     wire            bram_wr_1_tlp = dshadow2tlp.rx_wren;
     wire            bram_wr_2_usb = ~bram_wr_1_tlp & dshadow2fifo.rx_wren;
     wire            bram_wr_3_int = ~bram_wr_1_tlp & ~bram_wr_2_usb & int_wren;
@@ -38,11 +32,6 @@ module pcileech_pcie_cfgspace_shadow(
     wire [9:0]      bram_wr_addr = bram_wr_1_tlp ? dshadow2tlp.rx_addr : (bram_wr_2_usb ? dshadow2fifo.rx_addr : int_wr_addr);
     wire [31:0]     bram_wr_data = bram_wr_1_tlp ? dshadow2tlp.rx_data : (bram_wr_2_usb ? dshadow2fifo.rx_data : int_wr_data);
     
-    // ----------------------------------------------------------------------------
-    // WRITE multiplexor and state machine: simple naive multiplexor which will prioritize in order:
-    // (1) PCIe (if enabled), (2) USB, (3) INTERNAL.
-    // Collisions will be discarded (it's assumed that they'll be very rare)
-    // ----------------------------------------------------------------------------
     `define S_SHADOW_CFGSPACE_IDLE  2'b00
     `define S_SHADOW_CFGSPACE_TLP   2'b01
     `define S_SHADOW_CFGSPACE_USB   2'b10
@@ -72,7 +61,6 @@ module pcileech_pcie_cfgspace_shadow(
             bram_rd_tp_2    <= bram_rd_tp_3;
         end
     
-    // BRAM MEMORY ACCESS for the 4kB / 0x1000 byte shadow configuration space.
     bram_pcie_cfgspace i_bram_pcie_cfgspace(
         .clka           ( clk                       ),
         .clkb           ( clk                       ),
