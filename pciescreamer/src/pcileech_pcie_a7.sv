@@ -97,6 +97,24 @@ module pcileech_pcie_a7(
     );
     
     // ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // MSI-X CONTROLLER & SHADOW CONFIG INTERFACE
+    // ----------------------------------------------------------------------------
+    
+    wire        msix_cfg_rden;
+    wire [9:0]  msix_cfg_addr;
+    wire [31:0] msix_cfg_data;
+    
+    pcileech_msix i_pcileech_msix(
+        .clk            ( clk_100           ),
+        .rst            ( rst_subsys        ),
+        .cfg_rden       ( msix_cfg_rden     ),
+        .cfg_rd_addr    ( msix_cfg_addr     ),
+        .cfg_rd_data    ( msix_cfg_data     ),
+        .trigger_req    ( 1'b0              ), // TODO: Wire to Event Logic
+        .interrupt_active (                 )
+    );
+
     // PCIe SHADOW CONFIGURTION SPACE BELOW
     // ----------------------------------------------------------------------------
     
@@ -104,7 +122,14 @@ module pcileech_pcie_a7(
         .rst                        ( rst_subsys                ),
         .clk                        ( clk_100                   ),
         .dshadow2fifo               ( dshadow2fifo_src          ),
-        .dshadow2tlp                ( dshadow2tlp.shadow        )
+        .dshadow2tlp                ( dshadow2tlp.shadow        ),
+        // Internal Interface (MSI-X)
+        .int_rden                   ( msix_cfg_rden             ),
+        .int_wren                   ( 1'b0                      ),
+        .int_wr_addr                ( 10'h0                     ),
+        .int_wr_data                ( 32'h0                     ),
+        .int_rd_addr                ( msix_cfg_addr             ),
+        .int_rd_data                ( msix_cfg_data             )
     );
     
     // ----------------------------------------------------------------------------

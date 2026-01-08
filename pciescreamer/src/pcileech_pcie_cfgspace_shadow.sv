@@ -16,14 +16,15 @@ module pcileech_pcie_cfgspace_shadow(
     input                   rst,
     input                   clk,
     IfShadow2Fifo.src       dshadow2fifo,
-    IfShadow2Tlp.shadow     dshadow2tlp
+    IfShadow2Tlp.shadow     dshadow2tlp,
+    // INTERNAL - MSI-X Controller Interface
+    input                   int_rden,
+    input                   int_wren,
+    input  [9:0]            int_wr_addr,
+    input  [31:0]           int_wr_data,
+    input  [9:0]            int_rd_addr,
+    output [31:0]           int_rd_data
     );
-    
-    wire            int_rden;
-    wire            int_wren;
-    wire [9:0]      int_wr_addr;
-    wire [31:0]     int_wr_data;
-    wire [9:0]      int_rd_addr;
     
     // ----------------------------------------------------------------------------
     // WRITE multiplexor: simple naive multiplexor which will prioritize in order:
@@ -91,15 +92,6 @@ module pcileech_pcie_cfgspace_shadow(
     assign dshadow2fifo.tx_addr     = bram_rd_addr;
     assign dshadow2fifo.tx_addr_lo  = bram_rd_tag[0];
     assign dshadow2fifo.tx_data     = dshadow2fifo.cfgtlp_zero ? 32'h00000000 : bram_rd_data;
-    
-    // ----------------------------------------------------------------------------
-    // INTERNAL LOGIC BELOW:
-    // ----------------------------------------------------------------------------
-    
-    assign int_rden     = 0;
-    assign int_wren     = 0;
-    assign int_wr_addr  = 0;
-    assign int_wr_data  = 0;
-    assign int_rd_addr  = 0;
+    assign int_rd_data = bram_rd_data;
     
 endmodule
