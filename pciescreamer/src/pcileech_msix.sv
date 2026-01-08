@@ -12,12 +12,12 @@
 module pcileech_msix(
     input               clk,
     input               rst,
-    
+
     // Interface to Shadow Config Space (to check Enable bit)
     output reg          cfg_rden,
     output reg [9:0]    cfg_rd_addr,
     input      [31:0]   cfg_rd_data,
-    
+
     // Interrupt Trigger Interface
     input               trigger_req,
     output reg          interrupt_active
@@ -25,17 +25,16 @@ module pcileech_msix(
 
     // State Machine
     // 0: Idle
-    // 1: Read Config 
+    // 1: Read Config
     // 2: Check Enable
-    
+
     reg [1:0] state;
-    
     // Example: Check MSI-X Control Register at Offset 0xC0 (DWORD 0x30)
     // Bit 31 = Enable? No, MSI-X Control is 16-bit.
     // Cap Header: ID(8), Next(8), MsgCtrl(16).
     // offset + 2 bytes.
     // Let's assume MSI-X Cap is at 0x40. 0x40 >> 2 = 0x10.
-    
+
     always @ (posedge clk) begin
         if (rst) begin
             state <= 0;
@@ -51,13 +50,11 @@ module pcileech_msix(
                          cfg_rd_addr <= 10'h10; // 0x40 / 4
                     end
                 end
-                
                 1: begin
                     // Wait for BRAM latency (1 cycle? shadow module has pipelining)
                     cfg_rden <= 0;
                     state <= 2;
                 end
-                
                 2: begin
                     // Check Enable Bit (Bit 15 of Message Control, which is upper 16 bits of DWORD 0)
                     // Data: [31:16] = Msg Ctrl, [15:8] = Next, [7:0] = Cap ID

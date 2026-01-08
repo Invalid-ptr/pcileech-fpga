@@ -97,7 +97,6 @@ module pcileech_pcie_a7(
     );
     
     // ----------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------
     // MSI-X CONTROLLER & SHADOW CONFIG INTERFACE
     // ----------------------------------------------------------------------------
     
@@ -112,9 +111,10 @@ module pcileech_pcie_a7(
         .cfg_rd_addr    ( msix_cfg_addr     ),
         .cfg_rd_data    ( msix_cfg_data     ),
         .trigger_req    ( 1'b0              ), // TODO: Wire to Event Logic
-        .interrupt_active (                 )
+        .interrupt_active(                 )
     );
 
+    // ----------------------------------------------------------------------------
     // PCIe SHADOW CONFIGURTION SPACE BELOW
     // ----------------------------------------------------------------------------
     
